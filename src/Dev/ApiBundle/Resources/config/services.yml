@@ -1,0 +1,20 @@
+services:
+    auth_token_user_provider:
+        class: Dev\ApiBundle\Security\AuthTokenUserProvider
+        arguments: [ '@api.security.auth_token_repository', '@api.security.user_repository' ]
+        public: false
+
+    api.security.auth_token_repository:
+            class:   Doctrine\ORM\EntityManager
+            factory: ["@doctrine.orm.entity_manager", "getRepository"]
+            arguments: ["DevApiBundle:AuthToken"]
+
+    api.security.user_repository:
+        class:   Doctrine\ORM\EntityManager
+        factory: ["@doctrine.orm.entity_manager", "getRepository"]
+        arguments: ["DevApiBundle:User"]
+
+    auth_token_authenticator:
+        class: Dev\ApiBundle\Security\AuthTokenAuthenticator
+        arguments: [ "%unprotected_routes%" ]
+        public: false

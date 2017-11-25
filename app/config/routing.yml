@@ -1,0 +1,4 @@
+dev_api:
+    type: rest
+    resource: Dev\ApiBundle\Controller\UserController
+

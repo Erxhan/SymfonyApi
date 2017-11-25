@@ -1,0 +1,350 @@
+<?php
+
+namespace Dev\ApiBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use FOS\UserBundle\Model\User as BaseUser;
+use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * User
+ *
+ * @ORM\Table("users")
+ * @ORM\Entity(repositoryClass="Dev\ApiBundle\Repository\UserRepository")
+ * @UniqueEntity("email")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class User extends BaseUser
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+
+    /**
+     * @var Image
+     *
+     * @ORM\JoinColumn(name="avatar_id", nullable=true, onDelete="SET NULL")
+     * @ORM\OneToOne(targetEntity="Dev\ApiBundle\Entity\Image", cascade={"persist", "remove"})
+     * @Assert\Valid()
+     */
+    private $avatar;
+
+    /**
+     * @Assert\Email()
+     * @Assert\NotBlank()
+     */
+    protected $email;
+
+    /**
+     * @Assert\NotBlank()
+     * @Serializer\Exclude()
+     */
+    protected $plainPassword;
+
+    /**
+     * @var string
+     * @Assert\NotBlank()
+     * @ORM\Column(name="firstname", type="string", length=30, nullable=false)
+     */
+    private $firstname;
+
+    /**
+     * @var string
+     * @Assert\NotBlank()
+     * @ORM\Column(name="lastname", type="string", length=30, nullable=false)
+     */
+    private $lastname;
+
+    /**
+     * @var string
+     * @Assert\NotBlank()
+     * @ORM\Column(name="gender", type="string", length=10, nullable=false)
+     */
+    private $gender;
+
+    /**
+     * @var \DateTime
+     * @Assert\NotBlank()
+     * @Assert\Date()
+     *
+     * @ORM\Column(name="birthday", type="date", nullable=true)
+     */
+    private $birthday;
+
+    /**
+     * @var boolean
+     * @ORM\Column(name="is_online", type="boolean", nullable=true)
+     */
+    private $isOnline;
+
+    /**
+     * @var User[]
+     * @Serializer\Exclude()
+     * @ORM\JoinTable(name="friends")
+     * @ORM\ManyToMany(targetEntity="Dev\ApiBundle\Entity\User")
+     */
+    private $friends;
+
+    /**
+     * @var float
+     * @ORM\Column(name="longitude", type="string", nullable=true)
+     */
+    private $longitude;
+
+    /**
+     * @var float
+     * @ORM\Column(name="latitude", type="string", nullable=true)
+     */
+    private $latitude;
+
+
+    /**
+     * @ORM\PrePersist()
+     * @ORM\PreUpdate()
+     */
+    public function initUsername()
+    {
+        $this->username = $this->email;
+    }
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->friends = new ArrayCollection();
+    }
+
+    /**
+     * Set avatar
+     *
+     * @param string $avatar
+     *
+     * @return User
+     */
+    public function setAvatar($avatar)
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    /**
+     * Get avatar
+     *
+     * @return string
+     */
+    public function getAvatar()
+    {
+        return $this->avatar;
+    }
+
+    /**
+     * Set firstname
+     *
+     * @param string $firstname
+     *
+     * @return User
+     */
+    public function setFirstname($firstname)
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    /**
+     * Get firstname
+     *
+     * @return string
+     */
+    public function getFirstname()
+    {
+        return $this->firstname;
+    }
+
+    /**
+     * Set lastname
+     *
+     * @param string $lastname
+     *
+     * @return User
+     */
+    public function setLastname($lastname)
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    /**
+     * Get lastname
+     *
+     * @return string
+     */
+    public function getLastname()
+    {
+        return $this->lastname;
+    }
+
+    /**
+     * Set gender
+     *
+     * @param string $gender
+     *
+     * @return User
+     */
+    public function setGender($gender)
+    {
+        $this->gender = $gender;
+
+        return $this;
+    }
+
+    /**
+     * Get gender
+     *
+     * @return string
+     */
+    public function getGender()
+    {
+        return $this->gender;
+    }
+
+    /**
+     * Set birthday
+     *
+     * @param \DateTime $birthday
+     *
+     * @return User
+     */
+    public function setBirthday($birthday)
+    {
+        $this->birthday = $birthday;
+
+        return $this;
+    }
+
+    /**
+     * Get birthday
+     *
+     * @return \DateTime
+     */
+    public function getBirthday()
+    {
+        return $this->birthday;
+    }
+
+    /**
+     * Set isOnline
+     *
+     * @param boolean $isOnline
+     *
+     * @return User
+     */
+    public function setIsOnline($isOnline)
+    {
+        $this->isOnline = $isOnline;
+
+        return $this;
+    }
+
+    /**
+     * Get isOnline
+     *
+     * @return boolean
+     */
+    public function getIsOnline()
+    {
+        return $this->isOnline;
+    }
+
+
+    /**
+     * Add friend
+     *
+     * @param \Dev\ApiBundle\Entity\User $friend
+     *
+     * @return User
+     */
+    public function addFriend(\Dev\ApiBundle\Entity\User $friend)
+    {
+        $this->friends[] = $friend;
+
+        return $this;
+    }
+
+    /**
+     * Remove friend
+     *
+     * @param \Dev\ApiBundle\Entity\User $friend
+     */
+    public function removeFriend(\Dev\ApiBundle\Entity\User $friend)
+    {
+        $this->friends->removeElement($friend);
+    }
+
+    /**
+     * Get friends
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFriends()
+    {
+        return $this->friends;
+    }
+
+    /**
+     * Set longitude
+     *
+     * @param float $longitude
+     *
+     * @return User
+     */
+    public function setLongitude($longitude)
+    {
+        $this->longitude = $longitude;
+
+        return $this;
+    }
+
+    /**
+     * Get longitude
+     *
+     * @return float
+     */
+    public function getLongitude()
+    {
+        return $this->longitude;
+    }
+
+    /**
+     * Set latitude
+     *
+     * @param float $latitude
+     *
+     * @return User
+     */
+    public function setLatitude($latitude)
+    {
+        $this->latitude = $latitude;
+
+        return $this;
+    }
+
+    /**
+     * Get latitude
+     *
+     * @return float
+     */
+    public function getLatitude()
+    {
+        return $this->latitude;
+    }
+}
